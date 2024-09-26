@@ -48,14 +48,29 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
+                tile.item = GetRandomItem(x, y);
                 Debug.Log("Assigned item: " + tile.item + " to tile at (" + x + ", " + y + ")");
                 Tiles[x, y] = tile;
             }
-
         }
     }
 
+    private Item GetRandomItem(int x, int y)
+    {
+        List<Item> possibleItems = new List<Item>(ItemDatabase.Items);
+
+        if (x >= 2 && Tiles[x - 1, y].item == Tiles[x - 2, y].item)
+        {
+            possibleItems.Remove(Tiles[x - 1, y].item);
+        }
+        if (y >= 2 && Tiles[x, y - 1].item == Tiles[x, y - 2].item)
+        {
+            possibleItems.Remove(Tiles[x, y - 1].item);
+        }
+
+        return possibleItems[Random.Range(0, possibleItems.Count)];
+    }
+    // ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
     // Update is called once per frame
     void Update()
     {
