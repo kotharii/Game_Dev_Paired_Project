@@ -16,8 +16,21 @@ public sealed class Board : MonoBehaviour
 
     private void Awake() => Instance = this;
 
+    private Tile firstSelectedTile = null; // Track the first selected tile
+    private Tile secondSelectedTile = null; // Track the second selected tile
+
+
+    private Distance distance;
+
+    /* -------------------------MANUALLY SET LATER------------------------- */
+    public int RemainingDistance = 100;
+
+
     void Start()
     {
+        // Initialize distance board
+        distance = FindObjectOfType<Distance>();
+
         if (rows == null || rows.Length == 0)
         {
             Debug.LogError("Rows array is null or empty!");
@@ -49,11 +62,106 @@ public sealed class Board : MonoBehaviour
                 tile.y = y;
 
                 tile.item = GetRandomItem(x, y);
-                Debug.Log("Assigned item: " + tile.item + " to tile at (" + x + ", " + y + ")");
+                //Debug.Log("Assigned item: " + tile.item + " to tile at (" + x + ", " + y + ")");
                 Tiles[x, y] = tile;
             }
         }
     }
+
+
+    // Handle tile selection logic
+    public void OnTileSelected(Tile selectedTile)
+    {
+        if (firstSelectedTile == null)
+        {
+            // Select the first tile
+            firstSelectedTile = selectedTile;
+            Debug.Log("First tile selected at (" + selectedTile.x + ", " + selectedTile.y + ")");
+        }
+        else if (secondSelectedTile == null && selectedTile != firstSelectedTile)
+        {
+            // Select the second tile
+            secondSelectedTile = selectedTile;
+            Debug.Log("Second tile selected at (" + selectedTile.x + ", " + selectedTile.y + ")");
+
+
+            // Check if valid
+            if (secondSelectedTile.item == firstSelectedTile.item)
+            {
+                Debug.Log("Cannot switch the same item");
+            }
+            else
+            {
+                // Swap items between the two tiles
+                SwapItems(firstSelectedTile, secondSelectedTile);
+
+                // Deduct the distance
+                UpdateDistance(firstSelectedTile, secondSelectedTile);
+            }
+
+
+            // Reset the color of both tiles
+            firstSelectedTile.ChangeButtonColor(Color.white);
+            secondSelectedTile.ChangeButtonColor(Color.white);
+
+            firstSelectedTile.selected = !firstSelectedTile.selected;
+            secondSelectedTile.selected = !secondSelectedTile.selected;
+
+
+            // Reset the selection
+            firstSelectedTile = null;
+            secondSelectedTile = null;
+
+
+        }
+    }
+
+    // Swap items between two tiles
+    private void SwapItems(Tile tile1, Tile tile2)
+    {
+        Item tempItem = tile1.item;
+        tile1.item = tile2.item;
+        tile2.item = tempItem;
+
+        Debug.Log($"Swapped items between tile ({tile1.x}, {tile1.y}) and tile ({tile2.x}, {tile2.y})");
+    }
+
+
+    public void OnTileDeselected(Tile deselectedTile)
+    {
+        if (firstSelectedTile == null || firstSelectedTile != deselectedTile)
+        {
+            Debug.LogError("something went wrong with the first selected tile");
+            return;
+        }
+
+        firstSelectedTile = null;
+
+    }
+
+
+    private void UpdateDistance(Tile firstTile, Tile secondTile)
+    {
+        int cost = Mathf.Abs(firstTile.x - secondTile.x) + Mathf.Abs(firstTile.y - secondTile.y);
+
+        RemainingDistance -= cost;
+        Debug.Log($"Remaining distance: {RemainingDistance}");
+
+        distance.UpdateDistanceText(RemainingDistance.ToString());
+
+        CheckIfDistanceRunout();
+    }
+
+    private void CheckIfDistanceRunout()
+    {
+        if (RemainingDistance < 0)
+        {
+            Debug.Log("Ran out of distance. Game over");
+        }
+
+        // end the game
+    }
+
 
     private Item GetRandomItem(int x, int y)
     {
