@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Net;
 
 public sealed class Tile : MonoBehaviour
 {
@@ -47,7 +46,6 @@ public sealed class Tile : MonoBehaviour
 
         if (tileButton != null)
         {
-            // Add a listener to the onClick event
             tileButton.onClick.AddListener(TaskOnClick);
         }
         else
