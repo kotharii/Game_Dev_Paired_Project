@@ -189,7 +189,7 @@ public sealed class Board : MonoBehaviour
             panel.SetActive(true);
             blockingPanel.SetActive(true);
         }
-        else if (RemainingDistance >= 0 && Goal < AccumulateDestroyed)
+        else if (RemainingDistance >= 0 && Goal <= AccumulateDestroyed)
         {
             gameState.UpdateWinText();
             panel.SetActive(true);
