@@ -110,27 +110,53 @@ public sealed class Tile : MonoBehaviour
     { 
         Left, Top, Right, Bottom,
     };
-    public List<Tile> GetConnectedTiles(List<Tile> exclude = null)
+
+    public List<Tile> GetConnectedHorizontalTiles()
     {
-        var result = new List<Tile> { this, };
-        if (exclude == null)
+        var result = new List<Tile> { this };
+        var exclude = new List<Tile> { this };
+
+        // Traverse left
+        var current = this.Left;
+        while (current != null && current.Item == this.Item && !exclude.Contains(current))
         {
-            exclude = new List<Tile> { this, };
+            result.Add(current);
+            exclude.Add(current);
+            current = current.Left;
         }
-        else
+
+        // Traverse right
+        current = this.Right;
+        while (current != null && current.Item == this.Item && !exclude.Contains(current))
         {
-            exclude.Add(this);
+            result.Add(current);
+            exclude.Add(current);
+            current = current.Right;
         }
-        
-        foreach (var neighbour in Neighbours)
-        {
-            //if (Neighbours == null || exclude.Contains(neighbour) || neighbour.Item != Item) continue;
-            if (Neighbours == null || exclude == null || neighbour == null || exclude.Contains(neighbour) || neighbour.Item != Item) continue;
-            result.AddRange(neighbour.GetConnectedTiles(exclude));
-        }
+
         return result;
     }
 
-    
+    public List<Tile> GetConnectedVerticalTiles()
+    {
+        var result = new List<Tile> { this };
+        var exclude = new List<Tile> { this };
 
+        var current = this.Top;
+        while (current != null && current.Item == this.Item && !exclude.Contains(current))
+        {
+            result.Add(current);
+            exclude.Add(current);
+            current = current.Top;
+        }
+
+        current = this.Bottom;
+        while (current != null && current.Item == this.Item && !exclude.Contains(current))
+        {
+            result.Add(current);
+            exclude.Add(current);
+            current = current.Bottom;
+        }
+        return result;
+    }
 }

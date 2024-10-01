@@ -35,6 +35,17 @@ public sealed class Board : MonoBehaviour
 
         Tiles = new Tile[rows.Max(row => row.tiles.Length), rows.Length];
 
+        Item[,] predefinedItems = new Item[7, 9]
+        {
+            { ItemDatabase.Items[0], ItemDatabase.Items[2], ItemDatabase.Items[1], ItemDatabase.Items[2], ItemDatabase.Items[0], ItemDatabase.Items[1], ItemDatabase.Items[0], ItemDatabase.Items[3], ItemDatabase.Items[4]},
+            { ItemDatabase.Items[1],ItemDatabase.Items[4],ItemDatabase.Items[3],ItemDatabase.Items[0],ItemDatabase.Items[2],ItemDatabase.Items[3],ItemDatabase.Items[2],ItemDatabase.Items[4],ItemDatabase.Items[3]},
+            { ItemDatabase.Items[4], ItemDatabase.Items[3],ItemDatabase.Items[2],ItemDatabase.Items[1],ItemDatabase.Items[4],ItemDatabase.Items[0],ItemDatabase.Items[1],ItemDatabase.Items[3],ItemDatabase.Items[2] },
+            { ItemDatabase.Items[2],ItemDatabase.Items[0],ItemDatabase.Items[1],ItemDatabase.Items[4],ItemDatabase.Items[3],ItemDatabase.Items[2],ItemDatabase.Items[0],ItemDatabase.Items[4],ItemDatabase.Items[0] },
+            { ItemDatabase.Items[1],ItemDatabase.Items[2],ItemDatabase.Items[4],ItemDatabase.Items[3],ItemDatabase.Items[2],ItemDatabase.Items[4],ItemDatabase.Items[1],ItemDatabase.Items[3],ItemDatabase.Items[1] },
+            { ItemDatabase.Items[0],ItemDatabase.Items[1],ItemDatabase.Items[3],ItemDatabase.Items[2],ItemDatabase.Items[0],ItemDatabase.Items[3],ItemDatabase.Items[0],ItemDatabase.Items[4],ItemDatabase.Items[0]},
+            { ItemDatabase.Items[2], ItemDatabase.Items[0], ItemDatabase.Items[4],ItemDatabase.Items[0],ItemDatabase.Items[1],ItemDatabase.Items[4],ItemDatabase.Items[1],ItemDatabase.Items[0],ItemDatabase.Items[3]}
+        };
+
         for (var y = 0; y < Height; y++)
         {
             for (var x = 0; x < Width; x++)
@@ -43,37 +54,13 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.Item = GetRandomItem(x, y);
+                tile.Item = predefinedItems[x, y];
                 Tiles[x, y] = tile;
             }
         }
     }
 
-    private Item GetRandomItem(int x, int y)
-    {
-        List<Item> possibleItems = new List<Item>(ItemDatabase.Items);
-        /*
-        if (x >= 2 && Tiles[x - 1, y].Item == Tiles[x - 2, y].Item)
-        {
-            possibleItems.Remove(Tiles[x - 1, y].Item);
-        }
-        if (y >= 2 && Tiles[x, y - 1].Item == Tiles[x, y - 2].Item)
-        {
-            possibleItems.Remove(Tiles[x, y - 1].Item);
-        }
-        */
-        if (x >= 1)
-        {
-            possibleItems.Remove(Tiles[x - 1, y].Item);
-        }
-        if (y >= 1)
-        {
-            possibleItems.Remove(Tiles[x, y - 1].Item);
-        }
-
-        return possibleItems[Random.Range(0, possibleItems.Count)];
-    }
-
+    
     // Handle tile selection logic
     public void OnTileSelected(Tile selectedTile)
     {
@@ -179,9 +166,18 @@ public sealed class Board : MonoBehaviour
     private bool CanPop()
     {
         for (var y = 0; y < Height; y++)
+        {
             for (var x = 0; x < Width; x++)
-                if (Tiles[x, y].GetConnectedTiles().Skip(1).Count() >= 2)
+            {
+                var horizontalTiles = Tiles[x, y].GetConnectedHorizontalTiles();
+                var verticalTiles = Tiles[x, y].GetConnectedVerticalTiles();
+
+                if (horizontalTiles.Count >= 3 || verticalTiles.Count >= 3)
+                {
                     return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -194,26 +190,23 @@ public sealed class Board : MonoBehaviour
             for (var x = 0; x < Width; x++)
             {
                 var tile = Tiles[x, y];
-                var connectedTiles = tile.GetConnectedTiles();
-                if (connectedTiles.Skip(1).Count() < 2) continue;
-                
-                foreach (var connectedTile in connectedTiles)
+                var connectedTiles = tile.GetConnectedHorizontalTiles();
+                if (connectedTiles.Count() >= 3)
                 {
-                    var tileX = connectedTile.x;
-                    var tileY = connectedTile.y;
-
-                    // Add the tile's y value to the list for its column
-                    if (!columnsToShift.ContainsKey(tileX))
-                        columnsToShift[tileX] = new List<int>();
-
-                    
-                    // Check if tileY is already in the list to avoid duplicates
-                    if (!columnsToShift[tileX].Contains(tileY))
+                    foreach (var connectedTile in connectedTiles)
                     {
-                        columnsToShift[tileX].Add(tileY);
+                        AddTileToColumnsToShift(columnsToShift, connectedTile);
                     }
                 }
-                
+
+                connectedTiles = tile.GetConnectedVerticalTiles();
+                if (connectedTiles.Count >= 3)
+                {
+                    foreach (var connectedTile in connectedTiles)
+                    {
+                        AddTileToColumnsToShift(columnsToShift, connectedTile);
+                    }
+                }     
             }
         }
         // Process each column where tiles were removed
@@ -236,7 +229,6 @@ public sealed class Board : MonoBehaviour
 
                 // After shifting, set the topmost row to empty tile
                 Tiles[tileX, 0].Item = ScriptableObject.CreateInstance<Item>();
-
                 Tiles[tileX, 0].tileButton.interactable = false;
             }
         }
@@ -244,7 +236,19 @@ public sealed class Board : MonoBehaviour
         
 
     }
+    private void AddTileToColumnsToShift(Dictionary<int, List<int>> columnsToShift, Tile tile)
+    {
+        var tileX = tile.x;
+        var tileY = tile.y;
 
-    
+        if (!columnsToShift.ContainsKey(tileX))
+        {
+            columnsToShift[tileX] = new List<int>();
+        }
 
+        if (!columnsToShift[tileX].Contains(tileY))
+        {
+            columnsToShift[tileX].Add(tileY);
+        }
+    }
 }
