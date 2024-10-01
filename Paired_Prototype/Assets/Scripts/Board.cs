@@ -23,15 +23,33 @@ public sealed class Board : MonoBehaviour
 
 
     private Distance distance;
+    private GoalCounting destroyed;
+    private GameEnded gameState;
+
+    // pop up text window
+    public GameObject panel;
+    // blocking the whole canvas after game ended
+    public GameObject blockingPanel;
 
     /* -------------------------MANUALLY SET LATER------------------------- */
     public int RemainingDistance = 100;
+    public int AccumulateDestroyed = 0;
+    public int Goal = 20;
+    /* -------------------------MANUALLY SET LATER------------------------- */
+
+
     //private float TweenDuration = 0.5f;
 
     void Start()
     {
-        // Initialize distance board
+        // Initialize all the display
         distance = FindObjectOfType<Distance>();
+        destroyed = FindObjectOfType<GoalCounting>();
+        gameState = FindObjectOfType<GameEnded>();
+
+        // don't display it in the beginning
+        panel.SetActive(false);
+        blockingPanel.SetActive(false);
 
         Tiles = new Tile[rows.Max(row => row.tiles.Length), rows.Length];
 
@@ -91,6 +109,11 @@ public sealed class Board : MonoBehaviour
 
                 // Deduct the distance
                 UpdateDistance(firstSelectedTile, secondSelectedTile);
+                UpdateDestroyed();
+
+
+                // Check if game ended
+                CheckIfGameEnded();
             }
 
 
@@ -141,18 +164,42 @@ public sealed class Board : MonoBehaviour
 
         distance.UpdateDistanceText(RemainingDistance.ToString());
 
-        CheckIfDistanceRunout();
     }
 
-    private void CheckIfDistanceRunout()
+
+    private void UpdateDestroyed()
+    {
+        int destroyedCount = 0;
+        for (var y = 0; y < Height; y++)
+            for (var x = 0; x < Width; x++)
+                if (Tiles[x, y].Item.sprite == null)
+                    destroyedCount++;
+
+        AccumulateDestroyed = destroyedCount;
+
+        destroyed.UpdateDestroyedText(AccumulateDestroyed.ToString());
+    }
+
+
+    private void CheckIfGameEnded()
     {
         if (RemainingDistance < 0)
         {
-            Debug.Log("Ran out of distance. Game over");
+            gameState.UpdateLostText();
+            panel.SetActive(true);
+            blockingPanel.SetActive(true);
+        }
+        else if (RemainingDistance >= 0 && Goal < AccumulateDestroyed)
+        {
+            gameState.UpdateWinText();
+            panel.SetActive(true);
+            blockingPanel.SetActive(true);
         }
 
-        // end the game
+
     }
+
+
 
     /*
     // Checking neighbours
