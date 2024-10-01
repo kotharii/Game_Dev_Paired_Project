@@ -32,9 +32,9 @@ public sealed class Board : MonoBehaviour
     public GameObject blockingPanel;
 
     /* -------------------------MANUALLY SET LATER------------------------- */
-    public int RemainingDistance = 100;
+    public int RemainingDistance = 15;
     public int AccumulateDestroyed = 0;
-    public int Goal = 20;
+    public int Goal = 30;
     /* -------------------------MANUALLY SET LATER------------------------- */
 
 

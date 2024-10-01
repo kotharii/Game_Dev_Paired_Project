@@ -26,6 +26,6 @@ public class Distance : MonoBehaviour
 
     public void UpdateDistanceText(string remainingDistance)
     {
-        textDistance.text = "Distance Remaining:\n" + remainingDistance;
+        textDistance.text = "Coins Remaining:\n" + remainingDistance;
     }
 }

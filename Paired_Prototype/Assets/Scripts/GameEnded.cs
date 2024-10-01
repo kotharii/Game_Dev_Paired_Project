@@ -7,12 +7,10 @@ using UnityEngine.UI;
 public class GameEnded : MonoBehaviour
 {
     public TextMeshProUGUI textGameState;
-    private Board board;
 
     // Start is called before the first frame update
     void Start()
     {
-        board = FindObjectOfType<Board>();
 
     }
 
@@ -30,7 +28,7 @@ public class GameEnded : MonoBehaviour
 
     public void UpdateLostText()
     {
-        textGameState.text = $"<size=200%><uppercase>You lost.</uppercase>";
+        textGameState.text = $"<size=200%><uppercase>You lost</uppercase>";
         textGameState.color = Color.white;
 
     }

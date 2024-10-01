@@ -2385,9 +2385,9 @@ MonoBehaviour:
   - {fileID: 649760111}
   panel: {fileID: 1119928999}
   blockingPanel: {fileID: 1859129785}
-  RemainingDistance: 100
+  RemainingDistance: 15
   AccumulateDestroyed: 0
-  Goal: 20
+  Goal: 30
 --- !u!1 &704860557
 GameObject:
   m_ObjectHideFlags: 0
@@ -3522,9 +3522,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Distance Remaining:
-
-'
+  m_text: "Coins \nRemaining:\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
